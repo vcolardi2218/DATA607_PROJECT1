@@ -1,0 +1,124 @@
+---
+title: "DATA607 PROJECT 1"
+author: "Vincent Colardi"
+date: "September 23, 2018"
+output: html_document
+---
+
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyr)
+chess = read.table(file = "C:/R Programs/DATA607/Project 1/tournamentinfo2.txt", header = TRUE, sep="\t")
+
+chess_split <- unlist(str_split(chess$X,"\\|", n=1))
+
+chess_new <- data.frame(X=chess_split)
+chess_new <- subset(chess_new, X != " ")
+chess_new <- subset(chess_new,!grepl("Pair", chess_new$X))
+chess_new <- subset(chess_new,!grepl("USCF", chess_new$X))
+chess_new <- subset(chess_new,!grepl("\\-", chess_new$X))
+
+player_rating <- subset(chess, grepl("(MI|ON) \\|", chess$X))
+#player_rating <- subset(chess, grepl("(MI|ON|OH) \\|", chess$X))  (This statement errors out for some unknown reason)
+player_state <- unlist(str_sub(player_rating$X, start=4, end=5))
+player_rating <- unlist(str_sub(player_rating$X, start=23, end=26))
+
+player_num <- unlist(str_sub(chess_new$X, start=1, end=6))
+player_num <- gsub(" ","", player_num)
+
+player_name <- unlist(str_sub(chess_new$X, start=9, end=30))
+
+total_pts <- unlist(str_extract_all(chess_new$X, "[[:digit:]].[[:digit:]]"))
+
+round_1_status <- unlist(str_sub(chess_new$X, start=48, end=49))
+round_1_opponent <- unlist(str_sub(chess_new$X, start=50, end=52))
+
+round_2_status <- unlist(str_sub(chess_new$X, start=54, end=55))
+round_2_opponent <- unlist(str_sub(chess_new$X, start=56, end=58))
+
+round_3_status <- unlist(str_sub(chess_new$X, start=60, end=62))
+round_3_opponent <- unlist(str_sub(chess_new$X, start=63, end=64))
+
+round_4_status <- unlist(str_sub(chess_new$X, start=66, end=67))
+round_4_opponent <- unlist(str_sub(chess_new$X, start=69, end=70))
+
+round_5_status <- unlist(str_sub(chess_new$X, start=72, end=73))
+round_5_opponent <- unlist(str_sub(chess_new$X, start=75, end=76))
+
+round_6_status <- unlist(str_sub(chess_new$X, start=78, end=79))
+round_6_opponent <- unlist(str_sub(chess_new$X, start=81, end=82))
+
+round_7_status <- unlist(str_sub(chess_new$X, start=84, end=85))
+round_7_opponent <- unlist(str_sub(chess_new$X, start=87, end=88))
+
+
+library(dplyr)
+player_rankings <- data.frame(Player_Num=player_num, Player_Rating=player_rating)
+player_rankings$Player_Num <- as.integer(as.character(player_rankings$Player_Num))
+player_rankings$Player_Rating <- as.integer(as.character(player_rankings$Player_Rating))
+
+
+player_opp1 <- data.frame(Player_Num=player_num, op_1=round_1_opponent)
+player_opp1$op_1 <-as.integer(as.character(player_opp1$op_1))
+
+player_opp2 <- data.frame(Player_Num=player_num, op_2=round_2_opponent)
+player_opp2$op_2 <-as.integer(as.character(player_opp2$op_2))
+
+player_opp3 <- data.frame(Player_Num=player_num, op_3=round_3_opponent)
+player_opp3$op_3 <-as.integer(as.character(player_opp3$op_3))
+
+player_opp4 <- data.frame(Player_Num=player_num, op_4=round_4_opponent)
+player_opp4$op_4 <-as.integer(as.character(player_opp4$op_4))
+
+player_opp5 <- data.frame(Player_Num=player_num, op_5=round_5_opponent)
+player_opp5$op_5 <-as.integer(as.character(player_opp5$op_5))
+
+player_opp6 <- data.frame(Player_Num=player_num, op_6=round_6_opponent)
+player_opp6$op_6 <-as.integer(as.character(player_opp6$op_6))
+
+player_opp7 <- data.frame(Player_Num=player_num, op_7=round_7_opponent)
+player_opp7$op_7 <-as.integer(as.character(player_opp7$op_7))
+
+op1 <- left_join(player_opp1, player_rankings, c('op_1'='Player_Num'))
+op1$Player_Rating <- op1$Player_Rating %>% replace_na(0)
+op1$Count <- ave(op1$Player_Rating, op1$Player_Num, FUN = function(x) sum(x!=0))
+
+op2 <- left_join(player_opp2, player_rankings, c('op_2'='Player_Num'))
+op2$Player_Rating <- op2$Player_Rating %>% replace_na(0)
+op2$Count <- ave(op2$Player_Rating, op2$Player_Num, FUN = function(x) sum(x!=0))
+
+op3 <- left_join(player_opp3, player_rankings, c('op_3'='Player_Num'))
+op3$Player_Rating <- op3$Player_Rating %>% replace_na(0)
+op3$Count <- ave(op3$Player_Rating, op3$Player_Num, FUN = function(x) sum(x!=0))
+
+op4 <- left_join(player_opp4, player_rankings, c('op_4'='Player_Num'))
+op4$Player_Rating <- op4$Player_Rating %>% replace_na(0)
+op4$Count <- ave(op4$Player_Rating, op4$Player_Num, FUN = function(x) sum(x!=0))
+
+op5 <- left_join(player_opp5, player_rankings, c('op_5'='Player_Num'))
+op5$Player_Rating <- op5$Player_Rating %>% replace_na(0)
+op5$Count <- ave(op5$Player_Rating, op5$Player_Num, FUN = function(x) sum(x!=0))
+
+op6 <- left_join(player_opp6, player_rankings, c('op_6'='Player_Num'))
+op6$Player_Rating <- op6$Player_Rating %>% replace_na(0)
+op6$Count <- ave(op6$Player_Rating, op6$Player_Num, FUN = function(x) sum(x!=0))
+
+op7 <- left_join(player_opp7, player_rankings, c('op_7'='Player_Num'))
+op7$Player_Rating <- op7$Player_Rating %>% replace_na(0)
+op7$Count <- ave(op7$Player_Rating, op7$Player_Num, FUN = function(x) sum(x!=0))
+
+avg_opponent<- (op1$Player_Rating + op2$Player_Rating + op3$Player_Rating + op4$Player_Rating + op5$Player_Rating + op6$Player_Rating + op7$Player_Rating) / (op1$Count + op2$Count + op3$Count + op4$Count + op5$Count + op6$Count + op7$Count) 
+
+output <- data.frame(Player_Name=player_name, 
+                        Player_State=player_state,
+                        Total_Pts=total_pts,
+                        Player_Rating=player_rating,
+                        Average_Opponents_Rating=avg_opponent)
+output <- na.omit(output)
+output
+
+write.csv(output,'C:/R Programs/DATA607/Project 1/output.csv')
+
+
+```
